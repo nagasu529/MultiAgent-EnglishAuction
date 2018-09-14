@@ -22,7 +22,23 @@ public class Buyer extends Agent {
     //List of the sellers
     private AID[] sellerAgents;
     protected void setup(){
+        //Start agent and register all service.
         System.out.println(getAID().getName()+ " is ready");
+        DFAgentDescription dfd = new DFAgentDescription();
+        dfd.setName(getAID());
+        ServiceDescription sd = new ServiceDescription();
+        buyer.agentType = "Buyer";
+        sd.setType(buyer.agentType);
+        sd.setName(getAID().getName());
+        buyer.farmerName = getAID().getName();
+        dfd.addServices(sd);
+        try {
+            DFService.register(this, dfd);
+        }catch (FIPAException fe){
+            fe.printStackTrace();
+        }
+
+        myGui.displayUI("The agent stage is " + sd.getType() + "\n");
 
     }
 
