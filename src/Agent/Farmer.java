@@ -64,7 +64,7 @@ public class Farmer extends Agent{
         myGui.displayUI("Hello "+ getAID().getName() + "\n" + "Stage is " + sd.getType() + "\n");
 
         //Add a TickerBehaviour that chooses agent status to buyer or seller.
-        addBehaviour(new TickerBehaviour(this, 10000) {
+        addBehaviour(new TickerBehaviour(this, 10000){
             protected void onTick() {
 
                 myGui.displayUI("Agent status is " + farmerInfo.agentType + "\n");
@@ -397,33 +397,6 @@ public class Farmer extends Agent{
             }
         });
     }
-    /*
-    public void updateCatalogue(final String agentName, final double waterVolumn, final double priceForSell) {
-        addBehaviour(new OneShotBehaviour() {
-        public void action() {
-            double array[] = {waterVolumn, priceForSell};
-            System.out.println(array[1]);
-            catalogue.put(agentName, array);
-
-            //Get a set of the entries
-            Set names = catalogue.entrySet();
-
-            //Get a iterator
-            Iterator i = names.iterator();
-
-            //Display elements
-            while (i.hasNext()) {
-                Map.Entry me = (Map.Entry) i.next();
-                System.out.print(me.getKey() +  ": ");
-                System.out.println(me.getValue());
-            }
-            System.out.println();
-            //System.out.println(agentName+" need to sell water to others. The water volumn is = "+ volumeToSell);
-            }
-        } );
-    }
-    */
-
 
     protected void takeDown() {
         try {
