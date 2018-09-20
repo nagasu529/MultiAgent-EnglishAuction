@@ -8,7 +8,8 @@ public class Auction {
     double increseRateAcution;
 
 
-    public double englishAuction(double bidderPrice, double acutioneerPrice){
+    public double englishAuction(double bidderPrice, double acutioneerPrice, double chageRatePct, double pricePerMM){
+        changedPriceRate(chageRatePct, pricePerMM);
         if (acutioneerPrice < bidderPrice){
             double tempPrice = bidderPrice * increseRateAcution;
             return tempPrice;
@@ -18,11 +19,20 @@ public class Auction {
         }
     }
 
-    public void JapaneaseAuction(){
+    public double dutchAcution(double bidderPrice, double auctioneerPrice, double chageRatePct, double pricePerMM){
+        changedPriceRate(chageRatePct, pricePerMM);
+        if (bidderPrice < auctioneerPrice){
+            double temPrice = auctioneerPrice * increseRateAcution;
+            return temPrice;
+        }else {
+             return auctioneerPrice;
+        }
 
     }
 
-    public void changedPriceRate(double changePerct){
+    public void changedPriceRate(double changePerct, double pricePerMM){
+        double temRriceRate = (changePerct/100)*pricePerMM;
+        increseRateAcution = temRriceRate;
 
     }
 

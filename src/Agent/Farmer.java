@@ -206,7 +206,7 @@ public class Farmer extends Agent{
     }
 
     /*
-     *	OfferRequestsSerer
+     *	OfferRequestServer
      *	This behaviour is used b Seller mechanism for water buying request form other agent.
      *	If the requested water capacity and price match with buyer, the seller replies with a PROPOSE message specifying the price.
      *	Otherwise a REFUSE message is send back.
