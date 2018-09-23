@@ -25,7 +25,7 @@ public class Farmer extends Agent{
     //set agent status after calculating water reduction on farm.
     String agentStatus;
     double volumeToSell;
-    double volumeToBuy;
+    //double volumeToBuy;
     double sellingPrice;
     double buyingPrice;
     DecimalFormat df = new DecimalFormat("#.##");
@@ -34,7 +34,7 @@ public class Farmer extends Agent{
     private AID[] sellerAgent;
 
     //Farmer information on each agent.
-    agentInfo farmerInfo = new agentInfo("", "", 0.0, 0.0, "avalable");
+    agentInfo farmerInfo = new agentInfo("", "", 0.0, 0.0, "avalable", 0.0, 0.0, 0.0);
 
     //The list of information (buying or selling) from agent which include price and mm^3
     private HashMap catalogue = new HashMap();
@@ -61,7 +61,7 @@ public class Farmer extends Agent{
             fe.printStackTrace();
         }
 
-        myGui.displayUI("Hello "+ getAID().getName() + "\n" + "Stage is " + sd.getType() + "\n");
+        myGui.displayUI("Hello "+ farmerInfo.farmerName + "\n" + "Stage is " + farmerInfo.agentType + "\n");
 
         //Add a TickerBehaviour that chooses agent status to buyer or seller.
         addBehaviour(new TickerBehaviour(this, 10000){
@@ -378,8 +378,8 @@ public class Farmer extends Agent{
 
         public boolean done() {
             if (step == 2 && bestSeller == null) {
-                System.out.println("Attempt failed: "+volumeToBuy+" not available for sale");
-                myGui.displayUI("Attempt failed: "+ volumeToBuy +" not available for sale".toString());
+                //System.out.println("Attempt failed: "+volumeToBuy+" not available for sale");
+                myGui.displayUI("Attempt failed: do not have seller now".toString());
             }
             return ((step == 2 && bestSeller == null) || step == 4);
         }
@@ -415,13 +415,19 @@ public class Farmer extends Agent{
         double waterVolumn;
         double pricePerMM;
         String sellingStatus;
+        double minPrice;
+        double maxPrice;
+        double currentPrice;
 
-        agentInfo(String farmerName, String agentType, double waterVolumn, double pricePerMM, String sellingStatus){
+        agentInfo(String farmerName, String agentType, double waterVolumn, double pricePerMM, String sellingStatus, double minPrice, double maxPrice, double currentPrice){
             this.farmerName = farmerName;
             this.agentType = agentType;
             this.waterVolumn = waterVolumn;
             this.pricePerMM = pricePerMM;
             this.sellingStatus = sellingStatus;
+            this.minPrice = minPrice;
+            this.maxPrice = maxPrice;
+            this.currentPrice = currentPrice;
         }
     }
 }
