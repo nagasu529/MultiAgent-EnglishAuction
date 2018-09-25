@@ -1,23 +1,28 @@
 package Agent;
 
-import jade.core.Agent;
-import jade.core.AID;
-import jade.core.behaviours.*;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
 import Agent.Crop.cropType;
+import jade.core.AID;
+import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
-import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+
 /**
  *
  * @author chiewchk
  */
-public class Farmer extends Agent{
+public class FarmerTMP extends Agent{
 
     private FarmerGUI myGui;
     Crop calCrops = new Crop();
@@ -31,7 +36,7 @@ public class Farmer extends Agent{
     DecimalFormat df = new DecimalFormat("#.##");
 
     //The list of known water selling agent
-    private AID[] bidderAgent;
+    private AID[] sellerAgent;
 
     //Farmer information on each agent.
     agentInfo farmerInfo = new agentInfo("", "", 0.0, 0.0, "avalable", 0.0, 0.0, 0.0);
@@ -120,10 +125,10 @@ public class Farmer extends Agent{
                     try {
                         DFAgentDescription[] result = DFService.search(myAgent, template);
                         System.out.println("Found the following seller agents:");
-                        bidderAgent = new AID[result.length];
+                        sellerAgent = new AID[result.length];
                         for (int i = 0; i < result.length; ++i) {
-                            bidderAgent[i] = result[i].getName();
-                            System.out.println(bidderAgent[i].getName());
+                            sellerAgent[i] = result[i].getName();
+                            System.out.println(sellerAgent[i].getName());
                         }
                     }
                     catch (FIPAException fe) {
@@ -234,7 +239,7 @@ public class Farmer extends Agent{
                 } else {
                     // The requested water is NOT available for sale.
                     reply.setPerformative(ACLMessage.REFUSE);
-                    reply.setContent("Finished auction. Water capacity is sold");
+                    reply.setContent("do not water for sale");
                 }
                 myAgent.send(reply);
                 myGui.displayUI(log + "\n");
@@ -243,127 +248,6 @@ public class Farmer extends Agent{
             }
         }
     }
-
-    /*
-     * 	Request performer
-     *
-     * 	This behaviour is used by buyer mechanism to request seller agents for water pricing ana selling capacity.
-     */
-    private class RequestPerformer extends Behaviour {
-        private AID bestBidder; // The agent who provides the best offer
-        private double bestPrice;  // The best offered price
-        private int repliesCnt = 0; // The counter of replies from seller agents
-        private MessageTemplate mt; // The template to receive replies
-        int numBidderReply = 0;     //Counting a number of bidder and finishing auvtion after bidder is only one propose message.
-        private int step = 0;
-
-        public void action() {
-            switch (step) {
-                case 0:
-                    // Send the cfp to all sellers (Sending water volumn required to all bidding agent)
-                    ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-                    for (int i = 0; i < bidderAgent.length; ++i) {
-                        cfp.addReceiver(bidderAgent[i]);
-                    }
-                    cfp.setContent(String.valueOf(farmerInfo.waterVolumn));
-                    cfp.setConversationId("bidding");
-                    cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value
-                    myAgent.send(cfp);
-                    // Prepare the template to get proposals
-                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId("bidding"),
-                            MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
-                    step = 1;
-                    break;
-                case 1:
-                    // Receive all proposals/refusals from bidder agents
-
-                    ACLMessage reply = myAgent.receive(mt);
-                    if (reply != null) {
-                        // Reply received
-                        if (reply.getPerformative() == ACLMessage.PROPOSE) {
-                            //Count number of bidder that is propose message for water price bidding.
-                            numBidderReply++;
-                            // This is an offer
-                            double acceptedPrice = Double.parseDouble(reply.getContent());
-                            if (bestBidder == null || acceptedPrice < bestPrice) {
-                                // This is the best offer at present
-                                bestPrice = acceptedPrice;
-                                //System.out.println(volumn);
-                                bestBidder = reply.getSender();
-                            }
-                        }
-                        repliesCnt++;
-                        System.out.println("The number of current bidding is " + numBidderReply);
-                        System.out.println("Best price is from " + bestBidder);
-                        System.out.println("Price : " + bestPrice);
-
-                        if (repliesCnt >= bidderAgent.length-1) {
-                            // We received all replies
-
-                            step = 2;
-                        }
-                    }else {
-                        block();
-                    }
-                    break;
-                case 2:
-                    if(numBidderReply==1){
-                        step = 3;
-                    }else {
-                        step = 1;
-                    }
-                    break;
-                case 3:
-                    // Send the purchase order to the seller that provided the best offer
-                    ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
-                    order.addReceiver(bestBidder);
-                    order.setContent(String.valueOf(farmerInfo.pricePerMM));
-                    order.setConversationId("bidding");
-                    order.setReplyWith("order"+System.currentTimeMillis());
-                    myAgent.send(order);
-                    // Prepare the template to get the purchase order reply
-                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId("bidding"),
-                            MessageTemplate.MatchInReplyTo(order.getReplyWith()));
-
-                    step = 4;
-                    break;
-                case 4:
-                    // Receive the purchase order reply
-                    reply = myAgent.receive(mt);
-                    if (reply != null) {
-                        // Purchase order reply received
-                        if (reply.getPerformative() == ACLMessage.INFORM) {
-                            // Purchase successful. We can terminate
-                            System.out.println(farmerInfo.farmerName +" successfully purchased from agent "+reply.getSender().getName());
-                            System.out.println("Price = "+bestPrice);
-                            myGui.displayUI(farmerInfo.farmerName +" successfully purchased from agent "+reply.getSender().getName().toString());
-                            myGui.displayUI("Price = " + bestPrice);
-                            doSuspend();
-                            //myAgent.doDelete();
-                        }
-                        else {
-                            System.out.println("Attempt failed: requested water volumn already sold.");
-                            myGui.displayUI("Attempt failed: requested water volumn already sold.");
-                        }
-
-                        step = 5;
-                    }
-                    else {
-                        block();
-                    }
-                    break;
-            }
-        }
-
-        public boolean done() {
-            if (step == 2 && bestBidder == null) {
-                //System.out.println("Attempt failed: "+volumeToBuy+" not available for sale");
-                myGui.displayUI("Attempt failed: do not have seller now".toString());
-            }
-            return ((step == 2 && bestBidder == null) || step == 5);
-        }
-    }
-
     /*
      * 	PurchaseOrderServer
      * 	This behaviour is used by Seller agent to serve incoming offer acceptances (purchase orders) from buyer.
@@ -396,6 +280,113 @@ public class Farmer extends Agent{
             }else {
                 block();
             }
+        }
+    }
+    /*
+     * 	Request performer
+     *
+     * 	This behaviour is used by buyer mechanism to request seller agents for water pricing ana selling capacity.
+     */
+    private class RequestPerformer extends Behaviour {
+        private AID bestSeller; // The agent who provides the best offer
+        private double bestPrice;  // The best offered price
+        private int repliesCnt = 0; // The counter of replies from seller agents
+        private MessageTemplate mt; // The template to receive replies
+        private int step = 0;
+
+        public void action() {
+            switch (step) {
+                case 0:
+                    // Send the cfp to all sellers
+                    ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+                    for (int i = 0; i < sellerAgent.length; ++i) {
+                        cfp.addReceiver(sellerAgent[i]);
+                    }
+                    cfp.setContent(String.valueOf(farmerInfo.waterVolumn));
+                    cfp.setConversationId("water-trade");
+                    cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value
+                    myAgent.send(cfp);
+                    // Prepare the template to get proposals
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId("water-trade"),
+                            MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
+                    step = 1;
+                    break;
+                case 1:
+                    // Receive all proposals/refusals from seller agents
+                    ACLMessage reply = myAgent.receive(mt);
+                    if (reply != null) {
+                        // Reply received
+                        if (reply.getPerformative() == ACLMessage.PROPOSE) {
+                            // This is an offer
+                            double volumn = Double.parseDouble(reply.getContent());
+                            if (bestSeller == null || volumn < bestPrice) {
+
+                                // This is the best offer at present
+                                bestPrice = volumn;
+                                //System.out.println(volumn);
+                                bestSeller = reply.getSender();
+                            }
+                        }
+                        repliesCnt++;
+                        System.out.println("Best seller is " + bestSeller);
+                        System.out.println("Volumn to sell is :" + bestPrice);
+                        if (repliesCnt >= sellerAgent.length-1) {
+                            // We received all replies
+
+                            step = 2;
+                        }
+                    }else {
+                        block();
+                    }
+                    break;
+                case 2:
+                    // Send the purchase order to the seller that provided the best offer
+                    ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+                    order.addReceiver(bestSeller);
+                    order.setContent(String.valueOf(farmerInfo.pricePerMM));
+                    order.setConversationId("water-trade");
+                    order.setReplyWith("order"+System.currentTimeMillis());
+                    myAgent.send(order);
+                    // Prepare the template to get the purchase order reply
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId("water-trade"),
+                            MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+
+                    step = 3;
+                    break;
+                case 3:
+                    // Receive the purchase order reply
+                    reply = myAgent.receive(mt);
+                    if (reply != null) {
+                        // Purchase order reply received
+                        if (reply.getPerformative() == ACLMessage.INFORM) {
+                            // Purchase successful. We can terminate
+                            System.out.println(farmerInfo.farmerName +" successfully purchased from agent "+reply.getSender().getName());
+                            System.out.println("Price = "+bestPrice);
+                            myGui.displayUI(farmerInfo.farmerName +" successfully purchased from agent "+reply.getSender().getName().toString());
+                            myGui.displayUI("Price = " + bestPrice);
+                            doSuspend();
+                            //myAgent.doDelete();
+                        }
+                        else {
+                            System.out.println("Attempt failed: requested water volumn already sold.");
+                            myGui.displayUI("Attempt failed: requested water volumn already sold.");
+                        }
+
+                        step = 4;
+                    }
+                    else {
+                        block();
+                    }
+                    break;
+            }
+        }
+
+        public boolean done() {
+            if (step == 2 && bestSeller == null) {
+                //System.out.println("Attempt failed: "+volumeToBuy+" not available for sale");
+                myGui.displayUI("Attempt failed: do not have seller now".toString());
+            }
+            return ((step == 2 && bestSeller == null) || step == 4);
         }
     }
 
