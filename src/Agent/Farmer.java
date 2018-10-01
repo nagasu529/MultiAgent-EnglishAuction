@@ -216,7 +216,6 @@ public class Farmer extends Agent{
         public void action() {
 
             //Register service to DFDAgent
-
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
             ACLMessage msg = myAgent.receive(mt);
             String log = new String();
@@ -227,7 +226,7 @@ public class Farmer extends Agent{
 
                 //String sellingStatus = (String) farmerInfo.sellingStatus;
 
-                if (farmerInfo.sellingStatus== "avalable") {
+                if (farmerInfo.sellingStatus == "avalable") {
                     // The requested water is available for sale. Reply with the price
                     reply.setPerformative(ACLMessage.PROPOSE);
                     reply.setContent(String.valueOf(farmerInfo.waterVolumn));
