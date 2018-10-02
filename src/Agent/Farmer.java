@@ -19,15 +19,11 @@ import java.util.*;
  */
 public class Farmer extends Agent{
 
+    //The list of farmer who are seller (maps the water volumn to its based price)
+    private Hashtable waterCapacity;
     private FarmerGUI myGui;
     Crop calCrops = new Crop();
 
-    //set agent status after calculating water reduction on farm.
-    String agentStatus;
-    double volumeToSell;
-    //double volumeToBuy;
-    double sellingPrice;
-    double buyingPrice;
     DecimalFormat df = new DecimalFormat("#.##");
 
     //The list of known water selling agent
@@ -45,11 +41,12 @@ public class Farmer extends Agent{
         //Creating catalogue and running GUI
         myGui = new FarmerGUI(this);
         myGui.show();
-
-        //Start agent and register all service.
+        //Start agent
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
+
+        /*
         farmerInfo.agentType = "Farmer";
         sd.setType(farmerInfo.agentType);
         sd.setName(getAID().getName());
@@ -59,7 +56,7 @@ public class Farmer extends Agent{
             DFService.register(this, dfd);
         } catch (FIPAException fe) {
             fe.printStackTrace();
-        }
+        }*/
 
         myGui.displayUI("Hello "+ farmerInfo.farmerName + "\n" + "Stage is " + farmerInfo.agentType + "\n");
 
@@ -68,12 +65,14 @@ public class Farmer extends Agent{
             protected void onTick() {
 
                 myGui.displayUI("Agent status is " + farmerInfo.agentType + "\n");
-                if (farmerInfo.agentType=="seller"||farmerInfo.agentType=="Farmer-seller") {
+                if (farmerInfo.agentType=="owner"||farmerInfo.agentType=="Farmer-owner") {
                     //Register the seller description service on yellow pages.
-                    farmerInfo.agentType = "Farmer-seller";
+                    farmerInfo.agentType = "Farmer-owner";
                     sd.setType(farmerInfo.agentType);
-                    farmerInfo.pricePerMM = 300;
-                    //farmerInfo.sellingStatus = "available";
+                    sd.setName(getAID().getName());
+                    farmerInfo.farmerName = getAID().getName();
+                    farmerInfo.pricePerMM = 0.5;
+                    farmerInfo.minPrice = farmerInfo.pricePerMM;
                     dfd.addServices(sd);
                     myGui.displayUI("\n");
                     myGui.displayUI("Name: " + farmerInfo.farmerName + "\n");
@@ -81,45 +80,22 @@ public class Farmer extends Agent{
                     myGui.displayUI("Volumn to sell: " + farmerInfo.waterVolumn + "\n");
                     myGui.displayUI("Selling price: " + farmerInfo.pricePerMM + "\n");
                     myGui.displayUI("Selling status: " + farmerInfo.sellingStatus + "\n");
-                    myGui.displayUI("Preparing to sell" + "\n");
+                    myGui.displayUI("Maximum bidding: " + farmerInfo.maxPrice + "\n");
+                    myGui.displayUI("Providing price" + "\n");
                     myGui.displayUI("\n");
 
                     /*
                      ** Selling water process
                      */
 
-                    addBehaviour(new OfferRequestsServer());
-
-                    // Add the behaviour serving purchase orders from buyer agents
-                    addBehaviour(new PurchaseOrdersServer());
-
-                } else if(farmerInfo.agentType=="buyer"||farmerInfo.agentType=="Farmer-buyer"){
-                    farmerInfo.agentType = "Farmer-buyer";
-                    sd.setType(farmerInfo.agentType);
-                    farmerInfo.pricePerMM = 300;
-                    farmerInfo.waterVolumn = 3935.868;
-                    farmerInfo.sellingStatus = "unknown";
-                    myGui.displayUI("\n");
-                    myGui.displayUI("Name: " + farmerInfo.farmerName + "\n");
-                    myGui.displayUI("Status: " + farmerInfo.agentType + "\n");
-                    myGui.displayUI("Volumn to sell: " + farmerInfo.waterVolumn + "\n");
-                    myGui.displayUI("Selling price: " + farmerInfo.pricePerMM + "\n");
-                    myGui.displayUI("Selling status: " + farmerInfo.sellingStatus + "\n");
-                    myGui.displayUI("Looking to buy water" + "\n");
-                    myGui.displayUI("\n");
-
-                    /*
-                     ** Buying water process
-                     */
-
-                    //update seller list
+                    //update bidder list
                     DFAgentDescription template = new DFAgentDescription();
                     ServiceDescription sd = new ServiceDescription();
                     sd.setType("Farmer");
                     template.addServices(sd);
                     try {
                         DFAgentDescription[] result = DFService.search(myAgent, template);
-                        System.out.println("Found the following seller agents:");
+                        System.out.println("Found acutioneer agents:");
                         bidderAgent = new AID[result.length];
                         for (int i = 0; i < result.length; ++i) {
                             bidderAgent[i] = result[i].getName();
@@ -129,6 +105,36 @@ public class Farmer extends Agent{
                     catch (FIPAException fe) {
                         fe.printStackTrace();
                     }
+
+                    addBehaviour(new RequestPerformer());
+
+                    // Add the behaviour serving purchase orders from buyer agents
+                    addBehaviour(new PurchaseOrdersServer());
+
+                } else if(farmerInfo.agentType=="auctioneer"||farmerInfo.agentType=="Farmer-auctioneer"){
+                    //Register the seller description service on yellow pages.
+                    farmerInfo.agentType = "Farmer-auctioneer";
+                    sd.setType(farmerInfo.agentType);
+                    sd.setName(getAID().getName());
+                    farmerInfo.farmerName = getAID().getName();
+
+                    //Bidding rate, MinPrice, MaxPrice setting
+                    Auction incRate = new Auction();
+                    farmerInfo.minPrice = 1;
+                    farmerInfo.maxPrice = 10;
+                    farmerInfo.waterVolumn = 0;
+                    farmerInfo.sellingStatus = "Bidding-Process";
+                    myGui.displayUI("\n");
+                    myGui.displayUI("Name: " + farmerInfo.farmerName + "\n");
+                    myGui.displayUI("Status: " + farmerInfo.agentType + "\n");
+                    myGui.displayUI("The target volume for buying : " + farmerInfo.waterVolumn + "\n");
+                    myGui.displayUI("Bidding price: " + farmerInfo.pricePerMM + "\n");
+                    myGui.displayUI("Bidding status: " + farmerInfo.sellingStatus + "\n");
+                    myGui.displayUI("\n");
+
+                    /*
+                     ** Buying water process
+                     */
                     addBehaviour(new RequestPerformer());
                 }
             }
@@ -189,7 +195,7 @@ public class Farmer extends Agent{
                 resultCal.append("\n");
 
                 if (actualReduction >= (calCrops.totalWaterReq*totalWaterReductionPctg)) {
-                    farmerInfo.agentType = "seller";
+                    farmerInfo.agentType = "owner";
                     farmerInfo.waterVolumn = actualReduction;
                     myGui.displayUI(resultCal.toString());
                     //Clean parameter
