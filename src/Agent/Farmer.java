@@ -42,12 +42,11 @@ public class Farmer extends Agent{
         myGui = new FarmerGUI(this);
         myGui.show();
         //Start agent
+
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
-        ServiceDescription sd = new ServiceDescription();
-
-        /*
         farmerInfo.agentType = "Farmer";
+        ServiceDescription sd = new ServiceDescription();
         sd.setType(farmerInfo.agentType);
         sd.setName(getAID().getName());
         farmerInfo.farmerName = getAID().getName();
@@ -56,7 +55,7 @@ public class Farmer extends Agent{
             DFService.register(this, dfd);
         } catch (FIPAException fe) {
             fe.printStackTrace();
-        }*/
+        }
 
         myGui.displayUI("Hello "+ farmerInfo.farmerName + "\n" + "Stage is " + farmerInfo.agentType + "\n");
 
@@ -73,7 +72,7 @@ public class Farmer extends Agent{
                     farmerInfo.farmerName = getAID().getName();
                     farmerInfo.pricePerMM = 0.5;
                     farmerInfo.minPrice = farmerInfo.pricePerMM;
-                    dfd.addServices(sd);
+
                     myGui.displayUI("\n");
                     myGui.displayUI("Name: " + farmerInfo.farmerName + "\n");
                     myGui.displayUI("Status: " + farmerInfo.agentType + "\n");
@@ -91,7 +90,6 @@ public class Farmer extends Agent{
                     //update bidder list
                     DFAgentDescription template = new DFAgentDescription();
                     ServiceDescription sd = new ServiceDescription();
-                    sd.setType("Farmer");
                     template.addServices(sd);
                     try {
                         DFAgentDescription[] result = DFService.search(myAgent, template);
@@ -105,7 +103,6 @@ public class Farmer extends Agent{
                     catch (FIPAException fe) {
                         fe.printStackTrace();
                     }
-
                     addBehaviour(new RequestPerformer());
 
                     // Add the behaviour serving purchase orders from buyer agents
@@ -278,6 +275,7 @@ public class Farmer extends Agent{
                     mt = MessageTemplate.and(MessageTemplate.MatchConversationId("bidding"),
                             MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
                     step = 1;
+                    System.out.println(step);
                     break;
                 case 1:
                     // Receive all proposals/refusals from bidder agents
@@ -306,6 +304,7 @@ public class Farmer extends Agent{
                             // We received all replies
 
                             step = 2;
+                            System.out.println(step);
                         }
                     }else {
                         block();
@@ -314,8 +313,10 @@ public class Farmer extends Agent{
                 case 2:
                     if(numBidderReply==1){
                         step = 3;
+                        System.out.println(step);
                     }else {
                         step = 1;
+                        System.out.println(step);
                     }
                     break;
                 case 3:
@@ -331,6 +332,7 @@ public class Farmer extends Agent{
                             MessageTemplate.MatchInReplyTo(order.getReplyWith()));
 
                     step = 4;
+                    System.out.println(step);
                     break;
                 case 4:
                     // Receive the purchase order reply
@@ -352,6 +354,7 @@ public class Farmer extends Agent{
                         }
 
                         step = 5;
+                        System.out.println(step);
                     }
                     else {
                         block();
