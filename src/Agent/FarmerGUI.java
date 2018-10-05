@@ -69,9 +69,9 @@ public class FarmerGUI extends JFrame{
     }
 
     //GUI design preferences
-    private JTextField actualReducField;
-    private JButton calculateButton, textDirButton;
-    private JFileChooser choosingDir;
+    private JTextField actualReducField, increasePct, minPrice, maxPrice;
+    private JButton calculateButton, textDirButton, biddingButton;
+    //private JFileChooser choosingDir;
     private JTextArea log;
 
     FarmerGUI(Farmer a) {
@@ -79,10 +79,10 @@ public class FarmerGUI extends JFrame{
         myAgent = a;
 
         //Create a file chooser
-        choosingDir = new JFileChooser();
+        //choosingDir = new JFileChooser();
 
         //Combobox Buyer/Seler preferences and action listerner.
-        String[] agentWorkStirng = {"Seller","Buyer"};
+        String[] agentWorkStirng = {"Owner","Auctioneer"};
 
         //Combobox ET0 preference and action listerner.
         String[] etListStrings = { "ET0-Spring", "ET0-Summer", "ET0-Autumn", "ET0-Winter"};
@@ -109,15 +109,40 @@ public class FarmerGUI extends JFrame{
         stageList.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
                 if (stageList.getSelectedIndex()==0) {
-                    setAgentStatus("seller");
-                    myAgent.farmerInfo.agentType = "seller";
-                    displayUI("Agent status updated to seller\n");
+                    setAgentStatus("owner");
+                    myAgent.farmerInfo.agentType = "owner";
+                    displayUI("Agent status updated to Owner\n");
 
                 } else {
-                    setAgentStatus("buyer");
-                    //System.out.println("Agent status updated to buyer");
-                    displayUI("Agent status updated to buyer\n");
-                    myAgent.farmerInfo.agentType = "buyer";
+                    setAgentStatus("auctioneer");
+                    //System.out.println("Agent status updated to acutioneer");
+                    displayUI("Agent status updated to Auctioneer\n");
+                    myAgent.farmerInfo.agentType = "auctioneer";
+
+                    //New window for Bidding information
+                    JFrame frame = new JFrame("Bidding information");
+                    JPanel emptyLabel = new JPanel();
+                    frame.add(emptyLabel);
+                    getContentPane().add(emptyLabel, BorderLayout.NORTH);
+                    emptyLabel.setPreferredSize(new Dimension(175,100));
+                    frame.pack();
+                    frame.setVisible(true);
+                    /*
+                    emptyLabel.add(new JLabel("Price incresing rate (%)"));
+                    increasePct = new JTextField(15);
+                    emptyLabel.add(increasePct);
+                    emptyLabel.add(new JLabel("Minimum price (MM)"));
+                    minPrice = new JTextField(15);
+                    emptyLabel.add(minPrice);
+                    emptyLabel.add(new JLabel("Maximum price (MM)"));
+                    maxPrice = new JTextField(15);
+                    emptyLabel.add(maxPrice);
+                    emptyLabel.add(biddingButton);
+                    /*
+                    //GUI attributes
+
+
+                    */
                 }
             }
         });
