@@ -30,9 +30,9 @@ public class Auction {
 
     }
 
-    public void changedPriceRate(double changePerct, double pricePerMM){
+    public double changedPriceRate(double changePerct, double pricePerMM){
         double temRriceRate = (changePerct/100)*pricePerMM;
-        increseRateAcution = temRriceRate;
+        return temRriceRate;
 
     }
 

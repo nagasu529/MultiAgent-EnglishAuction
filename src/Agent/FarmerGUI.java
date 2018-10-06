@@ -11,17 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.AncestorListener;
 
 /**
@@ -119,30 +109,8 @@ public class FarmerGUI extends JFrame{
                     displayUI("Agent status updated to Auctioneer\n");
                     myAgent.farmerInfo.agentType = "auctioneer";
 
-                    //New window for Bidding information
-                    JFrame frame = new JFrame("Bidding information");
-                    JPanel emptyLabel = new JPanel();
-                    frame.add(emptyLabel);
-                    getContentPane().add(emptyLabel, BorderLayout.NORTH);
-                    emptyLabel.setPreferredSize(new Dimension(175,100));
-                    frame.pack();
-                    frame.setVisible(true);
-                    /*
-                    emptyLabel.add(new JLabel("Price incresing rate (%)"));
-                    increasePct = new JTextField(15);
-                    emptyLabel.add(increasePct);
-                    emptyLabel.add(new JLabel("Minimum price (MM)"));
-                    minPrice = new JTextField(15);
-                    emptyLabel.add(minPrice);
-                    emptyLabel.add(new JLabel("Maximum price (MM)"));
-                    maxPrice = new JTextField(15);
-                    emptyLabel.add(maxPrice);
-                    emptyLabel.add(biddingButton);
-                    /*
-                    //GUI attributes
 
 
-                    */
                 }
             }
         });
@@ -159,6 +127,13 @@ public class FarmerGUI extends JFrame{
         controls.add(etList);
         etList.setSelectedIndex(3);
         etList.setEditable(false);
+
+        //Internal JFrame
+        JDesktopPane biddingPanel = new JDesktopPane();
+        JInternalFrame if1 = new JInternalFrame("Frame 1", true, true, true, true );
+        if1.setSize(200,200);
+        biddingPanel.add(if1);
+        controls.add(biddingPanel);
 
         //log area create
         log = new JTextArea(5,20);

@@ -1,1 +1,1 @@
-http://DESKTOP-RCLUKAD.fritz.box:7778/acc
+http://172.24.168.44:7778/acc
