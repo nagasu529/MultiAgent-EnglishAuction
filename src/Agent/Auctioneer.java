@@ -54,7 +54,7 @@ public class Auctioneer extends Agent {
             fe.printStackTrace();
         }
         //Bidding process.
-        addBehaviour(new TickerBehaviour(this, 10000) {
+        addBehaviour(new TickerBehaviour(this, 30000) {
             public void onTick() {
 
                 if (farmerInfo.sellingStatus=="looking"){
@@ -109,19 +109,26 @@ public class Auctioneer extends Agent {
             if(msg != null){
                 String currentPriceAndBidding = msg.getContent();
                 ACLMessage reply = msg.createReply();
+                myGUI.displayUI("msg message from Seller: " + msg.getContent());
 
                 //Current price Per MM. and the number of volumn to sell.
                 for (String retval : currentPriceAndBidding.split("-")){
                     farmerInfo.waterVolumn = Double.parseDouble(retval);
+                    myGUI.displayUI("water volume from seller:" + farmerInfo.waterVolumn + "\n");
                     farmerInfo.currentPricePerMM = Double.parseDouble(retval);
+                    myGUI.displayUI("current price bidded: " + farmerInfo.currentPricePerMM + "\n");
                 }
                 //English Auction Process.
                 if (farmerInfo.currentPricePerMM < farmerInfo.maxPricePerMM) {
-                    farmerInfo.bidedPrice = auctRules.changedPriceRate(increasingBidRate,farmerInfo.pricePerMM);
-                    reply.setPerformative(ACLMessage.PROPOSE);
-                    reply.setContent(String.valueOf(farmerInfo.waterVolumn-farmerInfo.bidedPrice));
-                    myAgent.send(reply);
-                    myGUI.displayUI(log + "\n");
+                    farmerInfo.bidedPrice = auctRules.changedPriceRate(increasingBidRate,farmerInfo.currentPricePerMM);
+                    if (farmerInfo.currentPricePerMM < farmerInfo.maxPricePerMM){
+                        reply.setPerformative(ACLMessage.PROPOSE);
+                        String currentBidOffer = farmerInfo.waterVolumn + "-" + farmerInfo.currentPricePerMM;
+                        reply.setContent(currentBidOffer);
+                        myAgent.send(reply);
+                        myGUI.displayUI("Current Offer: " + reply + "\n");
+                        myGUI.displayUI(log + "\n");
+                    }
                 }else {
                     reply.setPerformative(ACLMessage.REFUSE);
                     reply.setContent(getAID().getName() + " is surrender");
@@ -171,8 +178,8 @@ public class Auctioneer extends Agent {
                 farmerInfo.sellingStatus = "looking";
                 farmerInfo.minPricePerMM = minPrice;
                 farmerInfo.maxPricePerMM = maxPrice;
-                farmerInfo.waterVolumn = VolumnToBuy;
                 increasingBidRate = increasePricePercentage;
+                farmerInfo.waterVolumn = VolumnToBuy;
 
             }
         });
