@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import javax.sql.rowset.JdbcRowSet;
 import javax.swing.*;
 import javax.swing.event.AncestorListener;
 
@@ -59,8 +60,8 @@ public class FarmerGUI extends JFrame{
     }
 
     //GUI design preferences
-    private JTextField actualReducField, increasePct, minPrice, maxPrice;
-    private JButton calculateButton, textDirButton, biddingButton;
+    private JTextField actualReducField;
+    private JButton calculateButton, textDirButton;
     //private JFileChooser choosingDir;
     private JTextArea log;
 
@@ -109,8 +110,6 @@ public class FarmerGUI extends JFrame{
                     displayUI("Agent status updated to Auctioneer\n");
                     myAgent.farmerInfo.agentType = "auctioneer";
 
-
-
                 }
             }
         });
@@ -127,13 +126,6 @@ public class FarmerGUI extends JFrame{
         controls.add(etList);
         etList.setSelectedIndex(3);
         etList.setEditable(false);
-
-        //Internal JFrame
-        JDesktopPane biddingPanel = new JDesktopPane();
-        JInternalFrame if1 = new JInternalFrame("Frame 1", true, true, true, true );
-        if1.setSize(200,200);
-        biddingPanel.add(if1);
-        controls.add(biddingPanel);
 
         //log area create
         log = new JTextArea(5,20);
@@ -207,3 +199,45 @@ public class FarmerGUI extends JFrame{
         log.setCaretPosition(log.getDocument().getLength());
     }
 }
+
+
+
+
+/*
+package Agent;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class BiddingUI extends JFrame {
+    public double minPrice, maxPrice, incPct;
+    private JButton bidButton;
+    private JTextField increaseBidVal;
+    private JTextField maxPriceVal;
+    private JTextField minPriceVal;
+
+    public BiddingUI() {
+        bidButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                incPct = Double.parseDouble(increaseBidVal.getText());
+                minPrice = Double.parseDouble(minPriceVal.getText());
+                maxPrice = Double.parseDouble(maxPriceVal.getText());
+            }
+        });
+    }
+
+    public void show() {
+        pack();
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int centerX = (int)screenSize.getWidth() / 2;
+        int centerY = (int)screenSize.getHeight() / 2;
+        setLocation(centerX - getWidth() / 2, centerY - getHeight() / 2);
+        super.show();
+    }
+
+}
+
+ */

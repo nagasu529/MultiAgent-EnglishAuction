@@ -62,7 +62,7 @@ public class Farmer extends Agent{
         myGui.displayUI("Hello "+ farmerInfo.farmerName + "\n" + "Stage is " + farmerInfo.agentType + "\n");
 
         //Add a TickerBehaviour that chooses agent status to buyer or seller.
-        addBehaviour(new TickerBehaviour(this, 10000){
+        addBehaviour(new TickerBehaviour(this, 100000){
             protected void onTick() {
 
                 myGui.displayUI("Agent status is " + farmerInfo.agentType + "\n");
