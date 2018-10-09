@@ -307,6 +307,7 @@ public class Seller extends Agent{
 
                         step = 5;
                         System.out.println(step);
+                        doSuspend();
                     }
                     else {
                         block();
