@@ -107,17 +107,18 @@ public class Auctioneer extends Agent {
             String log = new String();
             //CFP Message received. Process it.
             if(msg != null){
-                String currentPriceAndBidding = msg.getContent();
                 ACLMessage reply = msg.createReply();
-                myGUI.displayUI("msg message from Seller: " + msg.getContent());
+
 
                 //Current price Per MM. and the number of volumn to sell.
-                for (String retval : currentPriceAndBidding.split("-")){
-                    farmerInfo.waterVolumn = Double.parseDouble(retval);
-                    myGUI.displayUI("water volume from seller:" + farmerInfo.waterVolumn + "\n");
-                    farmerInfo.currentPricePerMM = Double.parseDouble(retval);
-                    myGUI.displayUI("current price bidded: " + farmerInfo.currentPricePerMM + "\n");
-                }
+                String currentOffer = msg.getContent();
+                String[] arrOfstr = currentOffer.split("-");
+                myGUI.displayUI("current Offer from Seller: " + currentOffer + "\n");
+                farmerInfo.waterVolumn = Double.parseDouble(arrOfstr[0]);
+                farmerInfo.currentPricePerMM = Double.parseDouble(arrOfstr[1]);
+
+                myGUI.displayUI("current price bidded: " + farmerInfo.currentPricePerMM + "\n");
+                myGUI.displayUI("water volume from seller:" + farmerInfo.waterVolumn + "\n");
                 //English Auction Process.
                 if (farmerInfo.currentPricePerMM < farmerInfo.maxPricePerMM) {
                     farmerInfo.bidedPrice = auctRules.changedPriceRate(increasingBidRate,farmerInfo.currentPricePerMM);
@@ -126,7 +127,7 @@ public class Auctioneer extends Agent {
                         String currentBidOffer = farmerInfo.waterVolumn + "-" + farmerInfo.currentPricePerMM;
                         reply.setContent(currentBidOffer);
                         myAgent.send(reply);
-                        myGUI.displayUI("Current Offer: " + reply + "\n");
+                        myGUI.displayUI("Current Offer: " + reply.getContent() + "\n");
                         myGUI.displayUI(log + "\n");
                     }
                 }else {
@@ -149,19 +150,20 @@ public class Auctioneer extends Agent {
                 myGUI.displayUI(msg.toString());
                 System.out.println(farmerInfo.sellingStatus);
                 reply.setPerformative(ACLMessage.INFORM);
-                if (farmerInfo.sellingStatus=="avalable") {
-                    farmerInfo.sellingStatus = "sold";
+                if (farmerInfo.sellingStatus=="looking") {
+                    farmerInfo.sellingStatus = "Finished bidding";
                     //System.out.println(getAID().getName()+" sold water to agent "+msg.getSender().getName());
-                    myGUI.displayUI(getAID().getLocalName()+" sold water to agent "+msg.getSender().getLocalName());
+                    myGUI.displayUI(msg.getSender().getLocalName()+" sell water to agent "+ getAID().getLocalName());
                     //myGui.displayUI(farmerInfo.sellingStatus.toString());
                     //System.out.println(farmerInfo.sellingStatus);
-                    doSuspend();
+                    //doSuspend();
                 } else {
                     // The requested book has been sold to another buyer in the meanwhile .
                     reply.setPerformative(ACLMessage.FAILURE);
                     reply.setContent("not-available for sale");
-                    myGUI.displayUI("not avalable to sell");
                 }
+                myAgent.send(reply);
+                doSuspend();
 
             }else {
                 block();

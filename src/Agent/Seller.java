@@ -14,10 +14,9 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
+import java.lang.reflect.Array;
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  *
@@ -65,17 +64,17 @@ public class Seller extends Agent{
         myGui.displayUI("Hello "+ farmerInfo.farmerName + "\n" + "Stage is " + farmerInfo.agentType + "\n");
 
         //Add a TickerBehaviour that chooses agent status to buyer or seller.
-        addBehaviour(new TickerBehaviour(this, 100000){
+        addBehaviour(new TickerBehaviour(this, 50000){
             protected void onTick() {
 
                 myGui.displayUI("Agent status is " + farmerInfo.agentType + "\n");
                 if (farmerInfo.agentType=="owner"||farmerInfo.agentType=="Farmer-owner") {
                     //Register the seller description service on yellow pages.
                     farmerInfo.agentType = "Farmer-owner";
+                    farmerInfo.pricePerMM = 10;
                     sd.setType(farmerInfo.agentType);
                     sd.setName(getAID().getName());
                     farmerInfo.farmerName = getAID().getName();
-                    farmerInfo.pricePerMM = 0.5;
                     farmerInfo.minPricePerMM = farmerInfo.pricePerMM;
 
                     myGui.displayUI("\n");
@@ -111,7 +110,7 @@ public class Seller extends Agent{
                     addBehaviour(new RequestPerformer());
 
                     // Add the behaviour serving purchase orders from buyer agents
-                    addBehaviour(new PurchaseOrdersServer());
+                    //addBehaviour(new PurchaseOrdersServer());
 
                 }
             }
@@ -213,8 +212,6 @@ public class Seller extends Agent{
                     }
                     //String arr = Double.toString(farmerInfo.waterVolumn)+"-"+Double.toString(farmerInfo.pricePerMM);
                     cfp.setContent(String.valueOf(Double.toString(farmerInfo.waterVolumn)+"-"+Double.toString(farmerInfo.pricePerMM)));
-                    System.out.println(farmerInfo.waterVolumn);
-                    System.out.println(farmerInfo.pricePerMM);
                     cfp.setConversationId("bidding");
                     cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value
                     myAgent.send(cfp);
@@ -237,12 +234,10 @@ public class Seller extends Agent{
                             numBidderReply++;
 
                             // This is an offer
-                            String biddedFromAcutioneer = reply.getContent();
-                            for(String retval: biddedFromAcutioneer.split("-")){
-                                waterVolFromBidder = Double.parseDouble(retval);
-                                biddedPriceFromBidder = Double.parseDouble(retval);
-                            }
-
+                            String biddedFromAcutioneer  =reply.getContent();
+                            String[] arrOfStr = biddedFromAcutioneer.split("-");
+                            waterVolFromBidder = Double.parseDouble(arrOfStr[0]);
+                            biddedPriceFromBidder = Double.parseDouble(arrOfStr[1]);
                             if (bestBidder == null || biddedPriceFromBidder < bestPrice) {
                                 // This is the best offer at present
                                 bestPrice = biddedPriceFromBidder;
@@ -250,6 +245,7 @@ public class Seller extends Agent{
                             }
                         }
                         repliesCnt++;
+                        System.out.println("Receive message: " + reply);
                         System.out.println("The number of current bidding is " + numBidderReply);
                         System.out.println("Best price is from " + bestBidder);
                         System.out.println("Price : " + bestPrice);
@@ -293,6 +289,7 @@ public class Seller extends Agent{
                     // Receive the purchase order reply
                     reply = myAgent.receive(mt);
                     if (reply != null) {
+                        System.out.println("True");
                         // Purchase order reply received
                         if (reply.getPerformative() == ACLMessage.INFORM) {
                             // Purchase successful. We can terminate
@@ -300,7 +297,7 @@ public class Seller extends Agent{
                             System.out.println("Price = "+bestPrice);
                             myGui.displayUI(farmerInfo.farmerName +" successfully purchased from agent "+reply.getSender().getName().toString());
                             myGui.displayUI("Price = " + bestPrice);
-                            doSuspend();
+                            //doSuspend();
                             //myAgent.doDelete();
                         }
                         else {
