@@ -34,7 +34,7 @@ public class Seller extends Agent{
     private AID[] bidderAgent;
 
     //Farmer information on each agent.
-    agentInfo farmerInfo = new agentInfo("", "", 0.0, 0.0, "avalable", 0.0, 0.0, 0.0, 0.0);
+    agentInfo farmerInfo = new agentInfo("", "", 0.0, 10, "avalable", 0.0, 0.0, 10, 10);
 
     //The list of information (buying or selling) from agent which include price and mm^3
     private HashMap catalogue = new HashMap();
@@ -71,7 +71,7 @@ public class Seller extends Agent{
                 if (farmerInfo.agentType=="owner"||farmerInfo.agentType=="Farmer-owner") {
                     //Register the seller description service on yellow pages.
                     farmerInfo.agentType = "Farmer-owner";
-                    farmerInfo.pricePerMM = 10;
+                    //farmerInfo.pricePerMM = 10;
                     sd.setType(farmerInfo.agentType);
                     sd.setName(getAID().getName());
                     farmerInfo.farmerName = getAID().getName();
@@ -194,11 +194,11 @@ public class Seller extends Agent{
     private class RequestPerformer extends Behaviour {
         private AID bestBidder; // The agent who provides the best offer
         private double bestPrice;  // The best offered price
-        private int repliesCnt = 0; // The counter of replies from seller agents
+        private int repliesCnt; // The counter of replies from seller agents
         private MessageTemplate mt; // The template to receive replies
-        int numBidderReply = 0;     //Counting a number of bidder and finishing auvtion after bidder is only one propose message.
         double waterVolFromBidder;
         double biddedPriceFromBidder;
+
 
         private int step = 0;
 
@@ -210,8 +210,11 @@ public class Seller extends Agent{
                     for (int i = 0; i < bidderAgent.length; ++i) {
                         cfp.addReceiver(bidderAgent[i]);
                     }
-                    //String arr = Double.toString(farmerInfo.waterVolumn)+"-"+Double.toString(farmerInfo.pricePerMM);
-                    cfp.setContent(String.valueOf(Double.toString(farmerInfo.waterVolumn)+"-"+Double.toString(farmerInfo.pricePerMM)));
+                    if(farmerInfo.currentPricePerMM >= farmerInfo.pricePerMM){
+                         cfp.setContent(String.valueOf(Double.toString(farmerInfo.waterVolumn)+"-"+Double.toString(farmerInfo.currentPricePerMM)));
+                    }else {
+                        cfp.setContent(String.valueOf(Double.toString(farmerInfo.waterVolumn)+"-"+Double.toString(farmerInfo.pricePerMM)));
+                    }
                     cfp.setConversationId("bidding");
                     cfp.setReplyWith("cfp"+System.currentTimeMillis()); // Unique value
                     myAgent.send(cfp);
@@ -224,36 +227,33 @@ public class Seller extends Agent{
                     break;
 
                 case 1:
+
                     // Receive all proposals/refusals from bidder agents
-                    numBidderReply = 0;
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
                         // Reply received
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
+                            System.out.println("Receive message: " + reply);
                             //Count number of bidder that is propose message for water price bidding.
-                            numBidderReply++;
-
                             // This is an offer
                             String biddedFromAcutioneer  =reply.getContent();
                             String[] arrOfStr = biddedFromAcutioneer.split("-");
                             waterVolFromBidder = Double.parseDouble(arrOfStr[0]);
                             biddedPriceFromBidder = Double.parseDouble(arrOfStr[1]);
-                            if (bestBidder == null || biddedPriceFromBidder < bestPrice) {
+                            if (bestBidder == null || biddedPriceFromBidder > bestPrice) {
                                 // This is the best offer at present
                                 bestPrice = biddedPriceFromBidder;
+                                farmerInfo.currentPricePerMM = bestPrice;
                                 bestBidder = reply.getSender();
                             }
                         }
-                        repliesCnt++;
-                        System.out.println("Receive message: " + reply);
-                        System.out.println("The number of current bidding is " + numBidderReply);
+                        System.out.println("The number of current bidding is " + repliesCnt);
                         System.out.println("Best price is from " + bestBidder);
                         System.out.println("Price : " + bestPrice);
-                        farmerInfo.currentPricePerMM = bestPrice;
+                        repliesCnt++;
 
                         if (repliesCnt >= bidderAgent.length-1) {
                             // We received all replies
-
                             step = 2;
                             System.out.println(step);
                         }
@@ -262,7 +262,7 @@ public class Seller extends Agent{
                     }
                     break;
                 case 2:
-                    if(numBidderReply==1){
+                    if(repliesCnt==1){
                         step = 3;
                         System.out.println(step);
                     }else {
@@ -274,7 +274,7 @@ public class Seller extends Agent{
                     // Send the purchase order to the seller that provided the best offer
                     ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                     order.addReceiver(bestBidder);
-                    order.setContent(String.valueOf(farmerInfo.pricePerMM));
+                    order.setContent(String.valueOf(farmerInfo.currentPricePerMM));
                     order.setConversationId("bidding");
                     order.setReplyWith("order"+System.currentTimeMillis());
                     myAgent.send(order);
@@ -289,14 +289,13 @@ public class Seller extends Agent{
                     // Receive the purchase order reply
                     reply = myAgent.receive(mt);
                     if (reply != null) {
-                        System.out.println("True");
                         // Purchase order reply received
                         if (reply.getPerformative() == ACLMessage.INFORM) {
                             // Purchase successful. We can terminate
                             System.out.println(farmerInfo.farmerName +" successfully purchased from agent "+reply.getSender().getName());
-                            System.out.println("Price = "+bestPrice);
+                            System.out.println("Price = "+farmerInfo.currentPricePerMM);
                             myGui.displayUI(farmerInfo.farmerName +" successfully purchased from agent "+reply.getSender().getName().toString());
-                            myGui.displayUI("Price = " + bestPrice);
+                            myGui.displayUI("Price = " + farmerInfo.currentPricePerMM);
                             //doSuspend();
                             //myAgent.doDelete();
                         }

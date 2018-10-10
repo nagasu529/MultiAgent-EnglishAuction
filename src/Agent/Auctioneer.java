@@ -54,7 +54,7 @@ public class Auctioneer extends Agent {
             fe.printStackTrace();
         }
         //Bidding process.
-        addBehaviour(new TickerBehaviour(this, 30000) {
+        addBehaviour(new TickerBehaviour(this, 10000) {
             public void onTick() {
 
                 if (farmerInfo.sellingStatus=="looking"){
@@ -119,12 +119,13 @@ public class Auctioneer extends Agent {
 
                 myGUI.displayUI("current price bidded: " + farmerInfo.currentPricePerMM + "\n");
                 myGUI.displayUI("water volume from seller:" + farmerInfo.waterVolumn + "\n");
+
                 //English Auction Process.
                 if (farmerInfo.currentPricePerMM < farmerInfo.maxPricePerMM) {
                     farmerInfo.bidedPrice = auctRules.changedPriceRate(increasingBidRate,farmerInfo.currentPricePerMM);
-                    if (farmerInfo.currentPricePerMM < farmerInfo.maxPricePerMM){
+                    if (farmerInfo.bidedPrice < farmerInfo.maxPricePerMM){
                         reply.setPerformative(ACLMessage.PROPOSE);
-                        String currentBidOffer = farmerInfo.waterVolumn + "-" + farmerInfo.currentPricePerMM;
+                        String currentBidOffer = farmerInfo.waterVolumn + "-" + farmerInfo.bidedPrice;
                         reply.setContent(currentBidOffer);
                         myAgent.send(reply);
                         myGUI.displayUI("Current Offer: " + reply.getContent() + "\n");
@@ -132,7 +133,9 @@ public class Auctioneer extends Agent {
                     }
                 }else {
                     reply.setPerformative(ACLMessage.REFUSE);
-                    reply.setContent(getAID().getName() + " is surrender");
+                    //reply.setContent(getAID().getName() + " is surrender");
+                    myAgent.send(reply);
+                    myGUI.displayUI(getAID().getName() + " is surrender");
                 }
             }else {
                 block();
@@ -182,7 +185,6 @@ public class Auctioneer extends Agent {
                 farmerInfo.maxPricePerMM = maxPrice;
                 increasingBidRate = increasePricePercentage;
                 farmerInfo.waterVolumn = VolumnToBuy;
-
             }
         });
     }
