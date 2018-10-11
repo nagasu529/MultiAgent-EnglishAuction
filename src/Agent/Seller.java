@@ -243,6 +243,8 @@ public class Seller extends Agent{
                             String[] arrOfStr = biddedFromAcutioneer.split("-");
                             waterVolFromBidder = Double.parseDouble(arrOfStr[0]);
                             biddedPriceFromBidder = Double.parseDouble(arrOfStr[1]);
+
+
                             if (bestBidder == null || biddedPriceFromBidder > bestPrice) {
                                 // This is the best offer at present
                                 bestPrice = biddedPriceFromBidder;

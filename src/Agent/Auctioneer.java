@@ -122,7 +122,7 @@ public class Auctioneer extends Agent {
 
                 //English Auction Process.
                 if (farmerInfo.currentPricePerMM < farmerInfo.maxPricePerMM) {
-                    farmerInfo.bidedPrice = auctRules.changedPriceRate(increasingBidRate,farmerInfo.currentPricePerMM);
+                    farmerInfo.bidedPrice = auctRules.changedPriceRate("inc", increasingBidRate,farmerInfo.currentPricePerMM);
                     if (farmerInfo.bidedPrice < farmerInfo.maxPricePerMM){
                         reply.setPerformative(ACLMessage.PROPOSE);
                         String currentBidOffer = farmerInfo.waterVolumn + "-" + farmerInfo.bidedPrice;
