@@ -198,6 +198,7 @@ public class Seller extends Agent{
         private MessageTemplate mt; // The template to receive replies
         double waterVolFromBidder;
         double biddedPriceFromBidder;
+        int proposeCnt, refuseCnt;
 
 
         private int step = 0;
@@ -231,8 +232,10 @@ public class Seller extends Agent{
                     // Receive all proposals/refusals from bidder agents
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
+                        repliesCnt++;
                         // Reply received
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
+                            proposeCnt++;
                             System.out.println("Receive message: " + reply);
                             //Count number of bidder that is propose message for water price bidding.
                             // This is an offer
@@ -246,11 +249,13 @@ public class Seller extends Agent{
                                 farmerInfo.currentPricePerMM = bestPrice;
                                 bestBidder = reply.getSender();
                             }
+                        }else if (reply.getPerformative() == ACLMessage.REFUSE){
+                            refuseCnt++;
                         }
                         System.out.println("The number of current bidding is " + repliesCnt);
+                        System.out.println("Refuse message number is " + refuseCnt + " and PROPOSE agent is " + proposeCnt);
                         System.out.println("Best price is from " + bestBidder);
                         System.out.println("Price : " + bestPrice);
-                        repliesCnt++;
 
                         if (repliesCnt >= bidderAgent.length-1) {
                             // We received all replies
@@ -262,12 +267,15 @@ public class Seller extends Agent{
                     }
                     break;
                 case 2:
-                    if(repliesCnt==1){
+                    if(refuseCnt >= 1 && proposeCnt==1){
                         step = 3;
                         System.out.println(step);
                     }else {
                         step = 0;
                         System.out.println(step);
+                        refuseCnt = 0;
+                        proposeCnt = 0;
+                        repliesCnt = 0;
                     }
                     break;
                 case 3:
