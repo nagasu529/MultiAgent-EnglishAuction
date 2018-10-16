@@ -239,7 +239,7 @@ public class Farmer extends Agent{
                 }
                 //English Auction Process.
                 if (farmerInfo.currentPricePerMM < farmerInfo.maxPricePerMM) {
-                    farmerInfo.bidedPrice = auctRules.changedPriceRate(10,farmerInfo.pricePerMM);
+                    farmerInfo.bidedPrice = auctRules.changedPriceRate("inc",10,farmerInfo.pricePerMM);
                     reply.setPerformative(ACLMessage.PROPOSE);
                     reply.setContent(String.valueOf(farmerInfo.waterVolumn-farmerInfo.bidedPrice));
                     myAgent.send(reply);
