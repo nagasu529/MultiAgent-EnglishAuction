@@ -14,7 +14,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 
 
-public class Auctioneer extends Agent {
+public class Bidder extends Agent {
 
     //The list of farmer who are seller (maps the water volumn to its based price)
     Crop calCrops = new Crop();
@@ -28,13 +28,13 @@ public class Auctioneer extends Agent {
     Double increasingBidRate;
 
     // The GUI by means of which the user can add books in the catalogue
-    private AuctioneerGUI myGUI;
+    private BidderGUI myGUI;
 
 
     protected void setup() {
         System.out.println(getAID().getName()+"  is ready" );
         // Create and show the GUI
-        myGUI = new AuctioneerGUI(this);
+        myGUI = new BidderGUI(this);
         myGUI.show();
 
         //Start Agent
@@ -174,7 +174,7 @@ public class Auctioneer extends Agent {
         }
     }
 
-    public void acutioneerInput(final Double minPrice, Double maxPrice, Double increasePricePercentage, Double VolumnToBuy){
+    public void bidderInput(final Double minPrice, Double maxPrice, Double increasePricePercentage, Double VolumnToBuy){
 
         addBehaviour(new OneShotBehaviour() {
             @Override

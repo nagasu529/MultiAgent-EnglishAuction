@@ -6,8 +6,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-public class AuctioneerGUI extends JFrame {
-    private Auctioneer auctioneerAgent;
+public class BidderGUI extends JFrame {
+    private Bidder bidderAgent;
 
     //Creating setter and getter for passing parameters.
     public static Double sMinPrice, sMaxPrice, sIncreasePriceRate, sVolumnToBuy;
@@ -44,10 +44,10 @@ public class AuctioneerGUI extends JFrame {
     private JTextField minPriceField, maxPriceField, increasePriceRate, volumeToBuy;
     private JTextArea log;
 
-    AuctioneerGUI(Auctioneer a) {
+    BidderGUI(Bidder a) {
         super(a.getLocalName().concat(" Bidding information"));
 
-        auctioneerAgent = a;
+        bidderAgent = a;
 
         JPanel p = new JPanel();
         p.setLayout(new GridLayout(2, 2));
@@ -90,13 +90,13 @@ public class AuctioneerGUI extends JFrame {
                     setIncreasePriceRate(Double.parseDouble(increseRate));
                     String volume = volumeToBuy.getText().trim();
                     setVolumeToBuy(Double.parseDouble(volume));
-                    auctioneerAgent.acutioneerInput(getMinPrice(), getMaxPrice(),getIncreasePriceRate(), getVolumnToBuy());
+                    bidderAgent.bidderInput(getMinPrice(), getMaxPrice(),getIncreasePriceRate(), getVolumnToBuy());
                     minPriceField.setText("");
                     maxPriceField.setText("");
                     increasePriceRate.setText("");
                 }
                 catch (Exception e) {
-                    JOptionPane.showMessageDialog(AuctioneerGUI.this, "Invalid values. "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(BidderGUI.this, "Invalid values. "+e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         } );
@@ -108,7 +108,7 @@ public class AuctioneerGUI extends JFrame {
         // the GUI using the button on the upper right corner
         addWindowListener(new	WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                auctioneerAgent.doDelete();
+                bidderAgent.doDelete();
             }
         } );
 

@@ -7,8 +7,10 @@ public class Auction {
         if(incORdec=="inc"){
             tempPriceRate = (pricePerMM + (changePerct/100)*pricePerMM);
 
-        }else{
+        }else if (incORdec == "dec"){
             tempPriceRate = (pricePerMM - (changePerct/100)*pricePerMM);
+        }else {
+            tempPriceRate = 0;
         }
         return tempPriceRate;
     }
