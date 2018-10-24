@@ -209,7 +209,9 @@ public class Seller extends Agent{
                     // Send the cfp to all sellers (Sending water volumn required to all bidding agent)
                     ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
                     for (int i = 0; i < bidderAgent.length; ++i) {
-                        cfp.addReceiver(bidderAgent[i]);
+                        if (bidderAgent[i].getName().equals(farmerInfo.farmerName)== false) {
+                            cfp.addReceiver(bidderAgent[i]);
+                        }
                     }
                     if(farmerInfo.currentPricePerMM >= farmerInfo.pricePerMM){
                          cfp.setContent(String.valueOf(Double.toString(farmerInfo.waterVolumn)+"-"+Double.toString(farmerInfo.currentPricePerMM)));
